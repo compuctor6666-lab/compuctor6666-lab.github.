@@ -1,30 +1,412 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Голосование НБ</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 500px;
-      margin: 40px auto;
-      text-align: center;
-      background: #111;
-      color: #eee;
-    }
-    .card {
-      background: #222;
-      padding: 30px;
-      border-radius: 16px;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>НБ · Голосование</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0b0b0f;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+            margin: 0;
+        }
+        .container {
+            max-width: 640px;
+            width: 100%;
+            background: #14141c;
+            border-radius: 36px;
+            padding: 28px 20px 24px;
+            border: 1px solid #262633;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+        h1 {
+            color: #fff;
+            font-weight: 700;
+            font-size: 26px;
+            letter-spacing: 1px;
+        }
+        .sub {
+            color: #7a7a94;
+            font-size: 14px;
+            margin-top: 4px;
+            margin-bottom: 24px;
+        }
+        .timer-box {
+            background: #1a1a26;
+            border-radius: 40px;
+            padding: 8px 18px;
+            display: inline-block;
+            border: 1px solid #2e2e40;
+            margin-bottom: 24px;
+            color: #b0b0d0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .timer-box span {
+            color: #ffbb66;
+        }
+        .fighter-block {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+        }
+        .fighter-card {
+            flex: 1 1 200px;
+            background: #1b1b26;
+            border-radius: 24px;
+            padding: 16px 12px 20px;
+            border: 1px solid #2a2a3a;
+            transition: 0.2s;
+        }
+        .fighter-card img {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            border-radius: 16px;
+            background: #0f0f14;
+            border: 1px solid #2e2e40;
+            display: block;
+            margin: 0 auto 10px;
+        }
+        .fighter-name {
+            font-weight: 600;
+            color: #eee;
+            font-size: 18px;
+        }
+        .vote-btn {
+            background: #2f2f44;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 10px 30px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 12px;
+            border: 1px solid #3f3f58;
+            width: 100%;
+        }
+        .vote-btn:hover:not(:disabled) {
+            background: #40405a;
+            border-color: #6a6a8a;
+        }
+        .vote-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(0.5);
+        }
+        .vote-btn.voted {
+            background: #1e4a2a;
+            border-color: #3a8a4a;
+            color: #b0ffb0;
+        }
+        #status {
+            margin: 24px 0 14px;
+            font-size: 16px;
+            min-height: 28px;
+            color: #b8b8cc;
+        }
+        #admin-panel {
+            background: #11111a;
+            border-radius: 20px;
+            padding: 18px 14px;
+            margin-top: 24px;
+            border: 1px solid #2a2a38;
+            display: none;
+        }
+        #admin-panel.visible {
+            display: block;
+        }
+        #admin-panel h3 {
+            color: #aaaac0;
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        #admin-panel .stats {
+            display: flex;
+            justify-content: space-around;
+            color: #ddd;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .stat-item {
+            background: #1a1a26;
+            padding: 10px 20px;
+            border-radius: 16px;
+            border: 1px solid #2a2a3a;
+        }
+        .stat-item small {
+            display: block;
+            font-size: 12px;
+            color: #7a7a94;
+            font-weight: 400;
+        }
+        .qr-area {
+            margin-top: 28px;
+            border-top: 1px solid #242433;
+            padding-top: 22px;
+        }
+        .qr-area img {
+            max-width: 180px;
+            width: 100%;
+            border-radius: 16px;
+            background: #0c0c12;
+            padding: 12px;
+            border: 1px solid #2a2a38;
+        }
+        .qr-label {
+            font-size: 13px;
+            color: #666680;
+            margin-bottom: 10px;
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #3a3a4a;
+        }
+        .badge {
+            background: #1a2a2a;
+            color: #6aaa7a;
+            padding: 4px 16px;
+            border-radius: 40px;
+            border: 1px solid #2a4a3a;
+            font-size: 12px;
+        }
+        .admin-toggle {
+            background: none;
+            border: none;
+            color: #3a3a52;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            text-decoration: underline;
+            opacity: 0.4;
+        }
+        .admin-toggle:hover {
+            opacity: 0.8;
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <h1> Голосование НБ</h1>
-    <p>Сайт работает. Скоро здесь будет голосование.</p>
-    <p>Твой ник: compuctor6666-lab</p>
-  </div>
+
+<div class="container">
+
+    <h1>⚔️ НЕДЕЛЬНАЯ БИТВА</h1>
+    <div class="sub">Голосуй за победителя</div>
+
+    <!-- ТАЙМЕР -->
+    <div class="timer-box" id="timerDisplay">
+        ⏳ Голосование закрывается через: <span id="timer">--:--:--</span>
+    </div>
+
+    <!-- БОЙЦЫ -->
+    <div class="fighter-block" id="fighters">
+        <div class="fighter-card">
+            <img id="imgA" src="" alt="Боец А" />
+            <div class="fighter-name" id="nameA">Боец А</div>
+            <button class="vote-btn" data-choice="A">Голос</button>
+        </div>
+        <div class="fighter-card">
+            <img id="imgB" src="" alt="Боец Б" />
+            <div class="fighter-name" id="nameB">Боец Б</div>
+            <button class="vote-btn" data-choice="B">Голос</button>
+        </div>
+    </div>
+
+    <div id="status">Твой голос определит исход</div>
+
+    <!-- QR -->
+    <div class="qr-area">
+        <div class="qr-label"> Отсканируй QR</div>
+        <img id="qrImage" src="" alt="QR-код" />
+    </div>
+
+    <!-- ПАНЕЛЬ АДМИНА (ТОЛЬКО ТЫ) -->
+    <div id="adminPanel" class="admin-panel">
+        <h3> АДМИН-ПАНЕЛЬ (только ты видишь)</h3>
+        <div class="stats">
+            <div class="stat-item"><small>Боец А</small><span id="adminA">0</span></div>
+            <div class="stat-item"><small>Боец Б</small><span id="adminB">0</span></div>
+            <div class="stat-item"><small>Всего</small><span id="adminTotal">0</span></div>
+        </div>
+        <div style="margin-top:12px; color:#6a6a84; font-size:13px;">
+             Голоса сохраняются локально. Перезагрузка не обнуляет.
+        </div>
+    </div>
+
+    <button class="admin-toggle" id="adminToggle"> показать админ-панель</button>
+
+    <div class="footer">
+        <span class="badge">1 голос · 1 устройство</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+
+        // ===== НАСТРОЙКА БОЯ =====
+        const FIGHTERS = {
+            A: {
+                name: 'Мангака',
+                img: 'https://placehold.co/300x400/2a2a3a/aaaac0?text=Joku'
+            },
+            B: {
+                name: 'Враг',
+                img: 'https://placehold.co/300x400/2a2a3a/aaaac0?text=???'
+            }
+        };
+
+        // ===== ТАЙМЕР (48 часов) =====
+        const VOTE_DURATION_HOURS = 48;
+        let endTime = localStorage.getItem('voteEndTime');
+        if (!endTime) {
+            endTime = Date.now() + VOTE_DURATION_HOURS * 60 * 60 * 1000;
+            localStorage.setItem('voteEndTime', endTime);
+        } else {
+            endTime = parseInt(endTime, 10);
+        }
+
+        // ===== ОБНОВЛЕНИЕ ТАЙМЕРА =====
+        function updateTimer() {
+            const now = Date.now();
+            const diff = endTime - now;
+            const timerEl = document.getElementById('timer');
+            if (diff <= 0) {
+                timerEl.textContent = 'ГОЛОСОВАНИЕ ЗАКРЫТО';
+                document.querySelectorAll('.vote-btn').forEach(b => b.disabled = true);
+                return;
+            }
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            timerEl.textContent =
+                String(h).padStart(2, '0') + ':' +
+                String(m).padStart(2, '0') + ':' +
+                String(s).padStart(2, '0');
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // ===== ЗАГРУЗКА КАРТИНОК И ИМЁН =====
+        document.getElementById('imgA').src = FIGHTERS.A.img;
+        document.getElementById('imgB').src = FIGHTERS.B.img;
+        document.getElementById('nameA').textContent = FIGHTERS.A.name;
+        document.getElementById('nameB').textContent = FIGHTERS.B.name;
+
+        // ===== ЗАЩИТА ОТ ПОВТОРНЫХ ГОЛОСОВ =====
+        const STORAGE_DEVICE = 'nb_device_id';
+        const STORAGE_VOTE = 'nb_vote_choice';
+
+        let deviceId = localStorage.getItem(STORAGE_DEVICE);
+        if (!deviceId) {
+            deviceId = crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random();
+            localStorage.setItem(STORAGE_DEVICE, deviceId);
+        }
+
+        const statusEl = document.getElementById('status');
+        const buttons = document.querySelectorAll('.vote-btn');
+
+        // ===== СИСТЕМА ГОЛОСОВ (локальное хранилище) =====
+        function getVotes() {
+            let data = localStorage.getItem('nb_votes_data');
+            if (!data) return { A: 0, B: 0 };
+            try { return JSON.parse(data); } catch { return { A: 0, B: 0 }; }
+        }
+
+        function saveVotes(votes) {
+            localStorage.setItem('nb_votes_data', JSON.stringify(votes));
+        }
+
+        function updateAdminPanel() {
+            const votes = getVotes();
+            document.getElementById('adminA').textContent = votes.A;
+            document.getElementById('adminB').textContent = votes.B;
+            document.getElementById('adminTotal').textContent = votes.A + votes.B;
+        }
+
+        // ===== ПРОВЕРКА — ГОЛОСОВАЛ ЛИ УЖЕ ЭТОТ БРАУЗЕР =====
+        const savedVote = localStorage.getItem(STORAGE_VOTE);
+        if (savedVote) {
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.dataset.choice === savedVote) {
+                    btn.classList.add('voted');
+                    btn.textContent = ' Уже голосовал';
+                }
+            });
+            statusEl.textContent = 'Ты уже проголосовал. Спасибо!';
+            updateAdminPanel();
+        }
+
+        // ===== ОБРАБОТКА ГОЛОСА =====
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.disabled) return;
+
+                // Проверка таймера
+                if (Date.now() > endTime) {
+                    statusEl.textContent = ' Голосование закрыто.';
+                    return;
+                }
+
+                const choice = this.dataset.choice;
+                const votes = getVotes();
+                votes[choice] = (votes[choice] || 0) + 1;
+                saveVotes(votes);
+
+                localStorage.setItem(STORAGE_VOTE, choice);
+
+                buttons.forEach(b => {
+                    b.disabled = true;
+                    if (b.dataset.choice === choice) {
+                        b.classList.add('voted');
+                        b.textContent = ' Голос учтён';
+                    }
+                });
+
+                statusEl.textContent = ` Ты проголосовал за ${choice === 'A' ? FIGHTERS.A.name : FIGHTERS.B.name}`;
+                updateAdminPanel();
+
+                console.log(`[VOTE] ${deviceId} → ${choice}`);
+            });
+        });
+
+        // ===== QR-КОД =====
+        const currentUrl = window.location.href;
+        document.getElementById('qrImage').src =
+            `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(currentUrl)}`;
+
+        // ===== АДМИН-ПАНЕЛЬ (ТОЛЬКО ТЫ) =====
+        let adminVisible = false;
+        const adminPanel = document.getElementById('adminPanel');
+        const adminToggle = document.getElementById('adminToggle');
+
+        adminToggle.addEventListener('click', function() {
+            adminVisible = !adminVisible;
+            adminPanel.classList.toggle('visible', adminVisible);
+            adminToggle.textContent = adminVisible ? ' скрыть админ-панель' : ' показать админ-панель';
+        });
+
+        updateAdminPanel();
+
+    })();
+</script>
+
 </body>
 </html>
